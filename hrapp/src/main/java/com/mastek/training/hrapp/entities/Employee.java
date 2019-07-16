@@ -1,13 +1,21 @@
 package com.mastek.training.hrapp.entities;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -24,7 +32,7 @@ import org.springframework.stereotype.Component;
 @NamedQueries({
 	
 	@NamedQuery(name ="Employee.findBySalary",
-			query = "select e from Employee e.salary between :min and :maxs")
+			query = "select e from Employee e where e.salary between :min and :max")
 })
 public class Employee implements Serializable {//->Manage serialization of Objects
 	
@@ -38,10 +46,53 @@ public class Employee implements Serializable {//->Manage serialization of Objec
 	private double salary;
 	
 	
+	//-> ManyToMnay Associations
+	private Set<Project> assignments = new HashSet<>();
+	
+	
+	//-> GETTERS AND SETTERS for ManyToMany
+	//-> @ManyToMany: configure the association for both the entities
+	//-> @JoinTable: provides all the configuration for the third table
+	//-> name: name of he Join Table
+	//-> joinColumns: Foreign Key column name for the current class 
+	//-> inverseJoinColumns: Foreign key column for other class
+	@ManyToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+	@JoinTable(name="JPA_ASSIGNMENTS", joinColumns=@JoinColumn(name="FK_EMPNO"), inverseJoinColumns=@JoinColumn(name="FK_PROJECTID"))
+	public Set<Project> getAssignments() {
+		return assignments;
+	}
+
+	public void setAssignments(Set<Project> assignments) {
+		this.assignments = assignments;
+	}
+
+
+
+	//-> Mapping ManyToOne: Each Employee belongs to one department
+	private Department currentDepartment;
+
+	//-> GETTERS AND SETTERS  for ManyToOne
+	
+	//-> @ManyToOne: associating the many class to one object
+	//-> @JoinColumn: configure the ForeignKey column for the association between two entities
+	@ManyToOne
+	@JoinColumn(name="FK_DepartmentId")
+	public Department getCurrentDepartment() {
+		return currentDepartment;
+	}
+
+	public void setCurrentDepartment(Department currentDepartment) {
+		this.currentDepartment = currentDepartment;
+	}
 	
 	
 	//-> add default constructor for this class. (must have a default constructor for Spring as well as getters and setters)
 	
+
+
+
+
+
 	public Employee() {
 		System.out.println("Employee Created");
 	}
